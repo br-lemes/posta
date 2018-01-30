@@ -160,8 +160,8 @@ function eng.sortlate(a, b)
 end
 
 function eng.sortname(a, b)
-	local comp_a = a.CS_NAME:match("^%d%d%.?%d%d%d(.*)")
-	local comp_b = b.CS_NAME:match("^%d%d%.?%d%d%d(.*)")
+	local comp_a = a.CS_NAME:match("^%A*(.*)")
+	local comp_b = b.CS_NAME:match("^%A*(.*)")
 	return (comp_a or a.CS_NAME) < (comp_b or b.CS_NAME)
 end
 
