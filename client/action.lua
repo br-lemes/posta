@@ -120,6 +120,10 @@ function gui.dialog:k_any(k)
 		gui.menusearch:action()
 	elseif k == iup.K_F5 then
 		gui.menuconf:action()
+	elseif k == iup.K_DOWN and iup.GetFocus() == gui.search then
+		iup.SetFocus(gui.result)
+		gui.result.value = "1"
+		gui.result:valuechanged_cb()
 	elseif k == iup.K_UP and iup.GetFocus() == gui.result and gui.result.value == "1" then
 		iup.SetFocus(gui.search)
 		gui.result.value = nil
