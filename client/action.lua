@@ -126,9 +126,6 @@ function gui.dialog:k_any(k)
 		gui.result:valuechanged_cb()
 	elseif k == iup.K_UP and iup.GetFocus() == gui.result and gui.result.value == "1" then
 		iup.SetFocus(gui.search)
-		gui.result.value = nil
-		gui.result:valuechanged_cb()
-		gui.b_zbox.value = gui.icons_box
 		return iup.IGNORE
 	elseif k == iup.K_CR then
 		if gui.zbox.value == gui.result_box then
@@ -178,6 +175,12 @@ function gui.search:valuechanged_cb()
 		act.select_timer.run = "YES"
 	end
 	gui.load_timer.run  = "YES"
+end
+
+function gui.search:getfocus_cb()
+	gui.result.value = nil
+	gui.result:valuechanged_cb()
+	gui.b_zbox.value = gui.icons_box
 end
 
 function gui.result:valuechanged_cb()
