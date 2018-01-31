@@ -78,6 +78,13 @@ gui.dialog = iup.dialog{
 								action = function () gui.rload() end,
 							},
 							iup.toggle{
+								name   = "mail_black",
+								image  = ico.mail_black,
+								value  = "OFF",
+								tip    = "Envelope simples",
+								action = function () gui.rload() end,
+							},
+							iup.toggle{
 								name   = "package",
 								image  = ico.package,
 								value  = "ON",

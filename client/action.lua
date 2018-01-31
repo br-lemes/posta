@@ -45,6 +45,7 @@ function gui.rload()
 		outros = gui.error.value       == "ON",
 		envreg = gui.mail_white.value  == "ON",
 		envsed = gui.mail_yellow.value == "ON",
+		simple = gui.mail_black.value  == "ON",
 		intern = gui.package.value     == "ON",
 		volume = gui.box.value         == "ON",
 		postal = gui.mail_box.value    == "ON",
@@ -67,19 +68,24 @@ function gui.iload()
 	local n = gui.result.count + 1
 	local v = gui.rtable[n]
 	if v and type(v) == "table" then
-		gui.result.appenditem = v.CS_NAME
-		if v.OBJ_TYPE == "outros" then
-			gui.result["image" .. n] = ico.error
-		elseif v.OBJ_TYPE == "envreg" then
-			gui.result["image" .. n] = ico.mail_white
-		elseif v.OBJ_TYPE == "envsed" then
-			gui.result["image" .. n] = ico.mail_yellow
-		elseif v.OBJ_TYPE == "intern" then
-			gui.result["image" .. n] = ico.package
-		elseif v.OBJ_TYPE == "volume" then
-			gui.result["image" .. n] = ico.box
-		elseif v.OBJ_TYPE == "postal" then
-			gui.result["image" .. n] = ico.mail_box
+		if v.CS_NAME then
+			gui.result.appenditem = v.CS_NAME
+			if v.OBJ_TYPE == "outros" then
+				gui.result["image" .. n] = ico.error
+			elseif v.OBJ_TYPE == "envreg" then
+				gui.result["image" .. n] = ico.mail_white
+			elseif v.OBJ_TYPE == "envsed" then
+				gui.result["image" .. n] = ico.mail_yellow
+			elseif v.OBJ_TYPE == "intern" then
+				gui.result["image" .. n] = ico.package
+			elseif v.OBJ_TYPE == "volume" then
+				gui.result["image" .. n] = ico.box
+			elseif v.OBJ_TYPE == "postal" then
+				gui.result["image" .. n] = ico.mail_box
+			end
+		elseif v[3] then
+			gui.result.appenditem = v[3]
+			gui.result["image" .. n] = ico.mail_black
 		end
 	elseif v then
 		gui.result.appenditem = v
@@ -176,18 +182,23 @@ function gui.result:valuechanged_cb()
 		local v = gui.rtable[n]
 		if type(v) == "table" then
 			gui.b_zbox.value = gui.details_box
-			gui.details.title = string.format(
-				"Objeto: %s - %s: %s - Data: %s\nComentário: %s",
-				v.LTD_ITEMCODE,
-				v.LTD_EVENTTYPECODE or "LDI",
-				v.LTD_ID,
-				v.LTD_CREATETIME:sub(1, 10),
-				v.LTD_COMMENT)
-			if v.LTD_CREATETIME:sub(1, 10) <
-				os.date("%Y-%m-%d", os.time()-v.LTD_LASTTIME*24*60*60) then
-				gui.details.fgcolor = "255 0 0"
-			else
-				gui.details.fgcolor = "0 0 0"
+			if v.CS_NAME then
+				gui.details.title = string.format(
+					"Objeto: %s - %s: %s - Data: %s\nComentário: %s",
+					v.LTD_ITEMCODE,
+					v.LTD_EVENTTYPECODE or "LDI",
+					v.LTD_ID,
+					v.LTD_CREATETIME:sub(1, 10),
+					v.LTD_COMMENT)
+				if v.LTD_CREATETIME:sub(1, 10) <
+					os.date("%Y-%m-%d", os.time()-v.LTD_LASTTIME*24*60*60) then
+					gui.details.fgcolor = "255 0 0"
+				else
+					gui.details.fgcolor = "0 0 0"
+				end
+			elseif v[3] then
+				gui.details.title = string.format("Número: %s - Data: %s\n", v[2], v[1])
+				-- TODO late
 			end
 		end
 	end

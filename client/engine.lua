@@ -1,5 +1,6 @@
 
 local fun = require("functions")
+local csv = require("client.csvutils")
 local eng = { }
 
 function eng.load()
@@ -10,7 +11,17 @@ function eng.load()
 	end
 	dofile(string.format("data/srodata-%s.lua", dsuffix))
 	dofile(string.format("data/ldidata-%s.lua", dsuffix))
-	dofile(string.format("data/objdata-%s.lua", dsuffix))
+	eng.simple = { }
+	local arq = io.open("simples.csv", "r")
+	for line in arq:lines() do
+		if line ~= ",," then
+			local t = csv.from(line)
+			if t[3] ~= "" then
+				table.insert(eng.simple, t)
+			end
+		end
+	end
+	arq:close()
 end
 
 function eng.upper(pattern, brackets)
@@ -71,6 +82,7 @@ function eng.check_options(options)
 	if options.outros == nil then options.outros = true end
 	if options.envreg == nil then options.envreg = true end
 	if options.envsed == nil then options.envdex = true end
+	if options.simple == nil then options.simple = true end
 	if options.intern == nil then options.intern = true end
 	if options.volume == nil then options.volume = true end
 	-- options.postal == nil é o mesmo que false
@@ -136,6 +148,17 @@ function eng.search(options)
 				end
 			end
 		end
+		if options.simple then
+			for i,v in ipairs(eng.simple) do
+				local a, b -- TODO late
+				if options.sby == 2 then -- Nome
+					a, b = pcall(string.find, v[3], options.search)
+				elseif options.sby == 4 then -- Número
+					a, b = pcall(string.find, v[2], options.search)
+				end
+				if a and b then table.insert(r, v) end
+			end
+		end
 		if options.late then
 			table.sort(r, eng.sortlate)
 		elseif options.order == "CS_NAME" then
@@ -160,8 +183,10 @@ function eng.sortlate(a, b)
 end
 
 function eng.sortname(a, b)
-	local comp_a = a.CS_NAME:match("^%A*(.*)")
-	local comp_b = b.CS_NAME:match("^%A*(.*)")
+	local comp_a = a.CS_NAME or a[3]
+	local comp_b = b.CS_NAME or b[3]
+	comp_a = comp_a:match("^%A*(.*)") or comp_a
+	comp_b = comp_b:match("^%A*(.*)") or comp_b
 	return (comp_a or a.CS_NAME) < (comp_b or b.CS_NAME)
 end
 
