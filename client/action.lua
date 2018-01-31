@@ -25,7 +25,7 @@ act.timer = iup.timer{
 }
 
 act.select_timer = iup.timer{
-	time      = 2500,
+	time      = 5000,
 	run       = "NO",
 	action_cb = function () gui.search.selection = "ALL" end
 }
