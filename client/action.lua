@@ -195,7 +195,11 @@ end
 
 function gui.cfg_late:action()
 	gui.result.removeitem = "ALL"
-	gui.rtable = eng.search{late = true, ltoday = gui.cfg_today.value == "ON"}
+	gui.rtable = eng.search{
+		postal = true,
+		late   = true,
+		ltoday = gui.cfg_today.value == "ON"
+	}
 	gui.load_timer.run = "NO"
 	iup.SetIdle(gui.iload)
 	gui.menusearch:action(true)
