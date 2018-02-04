@@ -12,11 +12,11 @@ function eng.load()
 	dofile(string.format("data/srodata-%s.lua", dsuffix))
 	dofile(string.format("data/ldidata-%s.lua", dsuffix))
 	eng.simple = { }
-	local arq = io.open("simples.csv", "r")
+	local arq = io.open("Posta Restante.csv", "r")
 	for line in arq:lines() do
 		if line ~= ",," then
 			local t = csv.from(line)
-			if t[3] ~= "" then
+			if t[4] ~= "" then
 				table.insert(eng.simple, t)
 			end
 		end
@@ -148,15 +148,21 @@ function eng.search(options)
 				end
 			end
 		end
-		if options.simple then
-			for i,v in ipairs(eng.simple) do
-				local a, b -- TODO late
+		for i,v in ipairs(eng.simple) do
+			local a, b -- TODO late
+			if not options.late then
 				if options.sby == 2 then -- Nome
-					a, b = pcall(string.find, v[3], options.search)
+					a, b = pcall(string.find, v[4], options.search)
 				elseif options.sby == 4 then -- Número
-					a, b = pcall(string.find, v[2], options.search)
+					a, b = pcall(string.find, v[3], options.search)
 				end
-				if a and b then table.insert(r, v) end
+				if options.envreg and v[1] == "SEED" then
+					if a and b then table.insert(r, v) end
+				elseif options.intern and (v[1]:find("CAIXETA") or v[1]:find("CAIXA") or v[1]:find("CX")) then
+					if a and b then table.insert(r, v) end
+				elseif options.simple then
+					if a and b then table.insert(r, v) end
+				end
 			end
 		end
 		if options.late then
@@ -171,20 +177,28 @@ function eng.search(options)
 end
 
 function eng.sortlate(a, b)
-	if a.LTD_ID < b.LTD_ID then
+	if a.LTD_ID and b.LTD_ID then
+		if a.LTD_ID < b.LTD_ID then
+			return true
+		elseif a.LTD_ID > b.LTD_ID then
+			return false
+		elseif a.LTD_GROUPNUMBER < b.LTD_GROUPNUMBER then
+			return true
+		elseif a.LTD_GROUPNUMBER > b.LTD_GROUPNUMBER then
+			return false
+		end
+	elseif a.LTD_ID and not b.LTD_ID then
 		return true
-	elseif a.LTD_ID > b.LTD_ID then
+	elseif not a.LTD_ID and b.LTD_ID then
 		return false
-	elseif a.LTD_GROUPNUMBER < b.LTD_GROUPNUMBER then
-		return true
-	elseif a.LTD_GROUPNUMBER > b.LTD_GROUPNUMBER then
-		return false
+	elseif not a.LTD_ID and not b.LTD_ID then
+		return a[4] < b[4]
 	end
 end
 
 function eng.sortname(a, b)
-	local comp_a = a.CS_NAME or a[3]
-	local comp_b = b.CS_NAME or b[3]
+	local comp_a = a.CS_NAME or a[4]
+	local comp_b = b.CS_NAME or b[4]
 	comp_a = comp_a:match("^%A*(.*)") or comp_a
 	comp_b = comp_b:match("^%A*(.*)") or comp_b
 	return (comp_a or a.CS_NAME) < (comp_b or b.CS_NAME)

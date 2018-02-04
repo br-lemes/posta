@@ -83,9 +83,15 @@ function gui.iload()
 			elseif v.OBJ_TYPE == "postal" then
 				gui.result["image" .. n] = ico.mail_box
 			end
-		elseif v[3] then
-			gui.result.appenditem = v[3]
-			gui.result["image" .. n] = ico.mail_black
+		elseif v[4] then
+			gui.result.appenditem = v[4]
+			if v[1] == "SEED" then
+				gui.result["image" .. n] = ico.mail_white
+			elseif v[1]:find("CAIXETA") or v[1]:find("CAIXA") or v[1]:find("CX") then
+				gui.result["image" .. n] = ico.package
+			else
+				gui.result["image" .. n] = ico.mail_black
+			end
 		end
 	elseif v then
 		gui.result.appenditem = v
@@ -203,8 +209,9 @@ function gui.result:valuechanged_cb()
 				else
 					gui.details.fgcolor = "0 0 0"
 				end
-			elseif v[3] then
-				gui.details.title = string.format("Número: %s - Data: %s\n", v[2], v[1])
+			elseif v[4] then
+				gui.details.title = string.format(
+					"Tipo: %s - Número: %s - Data: %s\n", v[1], v[3], v[2])
 				-- TODO late
 			end
 		end
