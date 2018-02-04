@@ -46,6 +46,7 @@ function gui.rload()
 		envreg = gui.mail_white.value  == "ON",
 		envsed = gui.mail_yellow.value == "ON",
 		simple = gui.mail_black.value  == "ON",
+		cobrar = gui.mail_red.value    == "ON",
 		intern = gui.package.value     == "ON",
 		volume = gui.box.value         == "ON",
 		postal = gui.mail_box.value    == "ON",
@@ -70,28 +71,25 @@ function gui.iload()
 	if v and type(v) == "table" then
 		if v.CS_NAME then
 			gui.result.appenditem = v.CS_NAME
-			if v.OBJ_TYPE == "outros" then
-				gui.result["image" .. n] = ico.error
-			elseif v.OBJ_TYPE == "envreg" then
-				gui.result["image" .. n] = ico.mail_white
-			elseif v.OBJ_TYPE == "envsed" then
-				gui.result["image" .. n] = ico.mail_yellow
-			elseif v.OBJ_TYPE == "intern" then
-				gui.result["image" .. n] = ico.package
-			elseif v.OBJ_TYPE == "volume" then
-				gui.result["image" .. n] = ico.box
-			elseif v.OBJ_TYPE == "postal" then
-				gui.result["image" .. n] = ico.mail_box
-			end
 		elseif v[4] then
-			gui.result.appenditem = v[4]
-			if v[1] == "SEED" then
-				gui.result["image" .. n] = ico.mail_white
-			elseif v[1]:find("CAIXETA") or v[1]:find("CAIXA") or v[1]:find("CX") then
-				gui.result["image" .. n] = ico.package
-			else
-				gui.result["image" .. n] = ico.mail_black
-			end
+			gui.result.appenditem = string.format("%s - %s", v[3], v[4])
+		end
+		if v.OBJ_TYPE == "outros" then
+			gui.result["image" .. n] = ico.error
+		elseif v.OBJ_TYPE == "envreg" then
+			gui.result["image" .. n] = ico.mail_white
+		elseif v.OBJ_TYPE == "envsed" then
+			gui.result["image" .. n] = ico.mail_yellow
+		elseif v.OBJ_TYPE == "simple" then
+			gui.result["image" .. n] = ico.mail_black
+		elseif v.OBJ_TYPE == "cobrar" then
+			gui.result["image" .. n] = ico.mail_red
+		elseif v.OBJ_TYPE == "intern" then
+			gui.result["image" .. n] = ico.package
+		elseif v.OBJ_TYPE == "volume" then
+			gui.result["image" .. n] = ico.box
+		elseif v.OBJ_TYPE == "postal" then
+			gui.result["image" .. n] = ico.mail_box
 		end
 	elseif v then
 		gui.result.appenditem = v

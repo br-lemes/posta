@@ -80,8 +80,15 @@ gui.dialog = iup.dialog{
 							iup.toggle{
 								name   = "mail_black",
 								image  = ico.mail_black,
-								value  = "OFF",
+								value  = "ON",
 								tip    = "Envelope simples",
+								action = function () gui.rload() end,
+							},
+							iup.toggle{
+								name   = "mail_red",
+								image  = ico.mail_red,
+								value  = "ON",
+								tip    = "Objetos a cobrar ou tributados",
 								action = function () gui.rload() end,
 							},
 							iup.toggle{

@@ -17,6 +17,20 @@ function eng.load()
 		if line ~= ",," then
 			local t = csv.from(line)
 			if t[4] ~= "" then
+				if t[3]:find("1%d%[. ]?%d%d%d") or t[1]:find("VOL") then
+					t.OBJ_TYPE = "volume"
+				elseif t[3]:find("2%d%[. ]?%d%d%d") or t[1] == "SEDEX" then
+					t.OBJ_TYPE = "envsed"
+				elseif t[3]:find("3%d%[. ]?%d%d%d") or t[1] == "SEED" then
+					t.OBJ_TYPE = "envreg"
+				elseif t[3]:find("4%d%[. ]?%d%d%d") or t[1]:find("CAIXETA") or t[1]:find("CAIXA") or t[1]:find("CX") then
+					t.OBJ_TYPE = "intern"
+				elseif t[3]:find("5%d%[. ]?%d%d%d") or t[1]:find("COBRAR") then
+					t.OBJ_TYPE = "cobrar"
+				else
+					t.OBJ_TYPE = "simple"
+				end
+				t[4] = t[4]:upper():gsub("–", "-")
 				table.insert(eng.simple, t)
 			end
 		end
@@ -83,6 +97,7 @@ function eng.check_options(options)
 	if options.envreg == nil then options.envreg = true end
 	if options.envsed == nil then options.envdex = true end
 	if options.simple == nil then options.simple = true end
+	if options.cobrar == nil then options.cobrar = true end
 	if options.intern == nil then options.intern = true end
 	if options.volume == nil then options.volume = true end
 	-- options.postal == nil é o mesmo que false
@@ -145,6 +160,8 @@ function eng.search(options)
 					table.insert(r, v)
 				elseif v.OBJ_TYPE == "postal" and options.postal then
 					table.insert(r, v)
+				elseif v.OBJ_TYPE == "cobrar" and options.cobrar then
+					table.insert(r, v)
 				end
 			end
 		end
@@ -156,12 +173,20 @@ function eng.search(options)
 				elseif options.sby == 4 then -- Número
 					a, b = pcall(string.find, v[3], options.search)
 				end
-				if options.envreg and v[1] == "SEED" then
-					if a and b then table.insert(r, v) end
-				elseif options.intern and (v[1]:find("CAIXETA") or v[1]:find("CAIXA") or v[1]:find("CX")) then
-					if a and b then table.insert(r, v) end
-				elseif options.simple then
-					if a and b then table.insert(r, v) end
+				if a and b then
+					if v.OBJ_TYPE == "simple" and options.simple then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "envreg" and options.envreg then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "envsed" and options.envsed then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "intern" and options.intern then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "volume" and options.volume then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "cobrar" and options.cobrar then
+						table.insert(r, v)
+					end
 				end
 			end
 		end
