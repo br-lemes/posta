@@ -11,10 +11,20 @@ function eng.load()
 	end
 	dofile(string.format("data/srodata-%s.lua", dsuffix))
 	dofile(string.format("data/ldidata-%s.lua", dsuffix))
+	eng.delete = { }
 	eng.simple = { }
+	local arq = io.open("data/delete.csv", "r")
+	if arq then
+		for line in arq:lines() do
+			eng.delete[line:upper():gsub("–", "-"):gsub(",*$", "")] = true
+		end
+		arq:close()
+	end
 	local arq = io.open("Posta Restante.csv", "r")
+	if not arq then return end
 	for line in arq:lines() do
-		if line ~= ",," then
+		line = line:upper():gsub("–", "-"):gsub(",*$", "")
+		if line ~= "" and not eng.delete[line] then
 			local t = csv.from(line)
 			if t[4] ~= "" then
 				if t[3]:find("1%d%[. ]?%d%d%d") or t[1]:find("VOL") then
@@ -30,7 +40,6 @@ function eng.load()
 				else
 					t.OBJ_TYPE = "simple"
 				end
-				t[4] = t[4]:upper():gsub("–", "-")
 				table.insert(eng.simple, t)
 			end
 		end
