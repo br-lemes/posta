@@ -1,5 +1,6 @@
 
 local iup = require("iuplua")
+local csv = require("client.csvutils")
 local eng = require("client.engine")
 local gui = require("client.layout")
 local ico = require("client.icons")
@@ -16,6 +17,57 @@ function act.question(message)
 	}
 	dlg:popup()
 	return dlg.buttonresponse == "1"
+end
+
+function act.delete()
+	local n = tonumber(gui.result.value)
+	local v = gui.rtable[n]
+	if v.CS_NAME then
+		if act.question("Ignorar objeto?\nATENÇÃO: você ainda vai precisar baixar no SRO.") then
+			local arq = io.open("data/ignore", "a")
+			if arq then
+				if arq:write(v.LTD_ITEMCODE, "\n") then
+					arq:close()
+					for _i, _v in ipairs(srodata) do
+						if _v.LTD_ITEMCODE == v.LTD_ITEMCODE then
+							table.remove(srodata, _i)
+							break
+						end
+					end
+					gui.rload()
+					iup.SetFocus(gui.search)
+				else
+					arq:close()
+					iup.MessageError("Falha", "Não foi possível gravar no arquivo dos ignorados.")
+				end
+			else
+				iup.MessageError("Falha", "Não foi possível gravar no arquivo dos ignorados.")
+			end
+		end
+	else
+		if act.question("Baixar como entregue/Excluir registro?") then
+			local arq = io.open("data/delete.csv", "a")
+			if arq then
+				local s = csv.to(v)
+				if arq:write(s, "\n") then
+					arq:close()
+					for _i, _v in ipairs(eng.simple) do
+						if _v == v then
+							table.remove(eng.simple, _i)
+							break
+						end
+					end
+					gui.rload()
+					iup.SetFocus(gui.search)
+				else
+					arq:close()
+					iup.MessageError("Falha", "Não foi possível gravar no arquivo dos excluídos.")
+				end
+			else
+				iup.MessageError("Falha", "Não foi possível gravar no arquivo dos excluídos.")
+			end
+		end
+	end
 end
 
 act.timer = iup.timer{
@@ -97,7 +149,7 @@ function gui.iload()
 		iup.SetIdle(nil)
 		if gui.search.value:find("^%a%a%d%d%d%d%d%d%d%d%d%a%a$") and gui.result.count == "1" then
 			gui.result.value = "1"
-			--gui.result:valuechanged_cb()
+			gui.result:valuechanged_cb()
 			gui.search.value = ""
 		end
 	end
@@ -131,6 +183,8 @@ function gui.dialog:k_any(k)
 	elseif k == iup.K_UP and iup.GetFocus() == gui.result and gui.result.value == "1" then
 		iup.SetFocus(gui.search)
 		return iup.IGNORE
+	elseif k == iup.K_DEL and iup.GetFocus() == gui.result then
+		act.delete()
 	elseif k == iup.K_CR then
 		if gui.zbox.value == gui.result_box then
 			if iup.GetFocus() == gui.search then
