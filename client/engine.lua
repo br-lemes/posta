@@ -26,7 +26,7 @@ function eng.load()
 		line = line:upper():gsub("–", "-"):gsub(",*$", "")
 		if line ~= "" and not eng.delete[line] then
 			local t = csv.from(line)
-			if t[4] ~= "" then
+			if type(t) == "table" and type(t[1]) == "string" and type(t[2]) == "string" and type(t[3]) == "string" and type(t[4]) == "string" and t[4] ~= "" then
 				if t[3]:find("1%d%[. ]?%d%d%d") or t[1]:find("VOL") then
 					t.OBJ_TYPE = "volume"
 				elseif t[3]:find("2%d%[. ]?%d%d%d") or t[1] == "SEDEX" then
