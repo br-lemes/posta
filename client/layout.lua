@@ -55,6 +55,7 @@ gui.dialog = iup.dialog{
 						name = "icons_box",
 						iup.fill{},
 						iup.hbox{
+							flat   = "YES",
 							iup.fill{},
 							iup.toggle{
 								name   = "error",
