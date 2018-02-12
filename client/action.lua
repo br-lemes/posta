@@ -217,7 +217,7 @@ function gui.menubutton:action()
 	gui.menu:popup(iup.MOUSEPOS, iup.MOUSEPOS)
 end
 
-function gui.menusearch:action(late)
+function gui.menusearch:action()
 	gui.menuconf.value   = "OFF"
 	gui.menusearch.value = "ON"
 	gui.menubutton.image = ico.magnifier
@@ -285,7 +285,7 @@ function gui.cfg_late:action()
 	}
 	gui.load_timer.run = "NO"
 	iup.SetIdle(gui.iload)
-	gui.menusearch:action(true)
+	gui.menusearch:action()
 end
 
 function gui.result:dblclick_cb(item, text, copy)
