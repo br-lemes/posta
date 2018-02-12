@@ -126,6 +126,17 @@ gui.dialog = iup.dialog{
 							title     = "\n",
 						},
 					},
+					iup.vbox{
+						name = "ancient_box",
+						iup.label{
+							name      = "ancient",
+							expand    = "HORIZONTAL",
+							alignment = "ACENTER",
+							title     = "Dados muito antigos. Pode não haver um\n" ..
+							            "servidor de posta restante funcionando.",
+							fgcolor   = "255 0 0",
+						},
+					},
 				},
 			},
 			iup.hbox{

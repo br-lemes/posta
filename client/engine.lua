@@ -5,12 +5,18 @@ local eng = { }
 
 function eng.load()
 	local dsuffix = fun.lastdata()
-	fun.dofile("data/ready.lua")
-	if dsuffix ~= fun.data.ready then
-		dsuffix = fun.prevdata()
+	if dsuffix then
+		fun.dofile("data/ready.lua")
+		if dsuffix ~= fun.data.ready then
+			dsuffix = fun.prevdata()
+		end
+		fun.dofile(string.format("data/srodata-%s.lua", dsuffix))
+		fun.dofile(string.format("data/ldidata-%s.lua", dsuffix))
+	else
+		fun.data.srodata = { }
+		fun.data.ldidata = { }
+		fun.data.ready   = ""
 	end
-	fun.dofile(string.format("data/srodata-%s.lua", dsuffix))
-	fun.dofile(string.format("data/ldidata-%s.lua", dsuffix))
 	eng.delete = { }
 	eng.simple = { }
 	local arq = io.open("data/delete.csv", "r")
@@ -21,7 +27,7 @@ function eng.load()
 		arq:close()
 	end
 	local arq = io.open("Posta Restante.csv", "r")
-	if not arq then return end
+	if not arq then return dsuffix end
 	for line in arq:lines() do
 		line = line:upper():gsub("–", "-"):gsub(",*$", "")
 		if line ~= "" and not eng.delete[line] then
@@ -45,6 +51,7 @@ function eng.load()
 		end
 	end
 	arq:close()
+	return dsuffix
 end
 
 function eng.upper(pattern, brackets)

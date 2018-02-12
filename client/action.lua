@@ -74,7 +74,7 @@ end
 act.timer = iup.timer{
 	time      = 1000 * (act.min * 60),
 	run       = "YES",
-	action_cb = function () eng.load() end
+	action_cb = function () act.dsuffix = eng.load() end
 }
 
 act.select_timer = iup.timer{
@@ -108,7 +108,12 @@ function gui.rload()
 	}
 	gui.load_timer.run = "NO"
 	gui.details.title = ""
-	gui.b_zbox.value = gui.icons_box
+	local dsuffix = fun.diffdata(act.dsuffix)
+	if not dsufix or dsuffix > 5 then
+		gui.b_zbox.value = gui.ancient_box
+	else
+		gui.b_zbox.value = gui.icons_box
+	end
 	iup.SetIdle(gui.iload)
 end
 
