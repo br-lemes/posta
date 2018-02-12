@@ -71,7 +71,11 @@ gui.timer = iup.timer{
 }
 
 function gui.timer:action_cb()
-	gui.status.title = sro.import()
+	local date = os.date("*t")
+	if date.hour > 7 and date.hour < 19 and date.wday ~= 1
+		and date.wday ~= 7 then -- custom sábado
+		gui.status.title = sro.import()
+	end
 	act.clean()
 end
 
