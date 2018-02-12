@@ -77,18 +77,20 @@ end
 
 gui.server.title = "Concentrador SRO: " .. sro.server
 
-local diffdata = fun.diffdata()
-if not diffdata or diffdata >= 1.5 then
-	gui.timer:action_cb()
-	gui.timer.run = "YES"
-	--gui.dialog.hidetaskbar = "YES"
-else
-	gui.status.title = string.format(
-[[
-Sua última sincronização foi a menos
-de %d minuto. Talvez já tenha um servidor
-rodando. Senão tente mais tarde.
-]], min)
+function gui.init()
+	local diffdata = fun.diffdata()
+	if not diffdata or diffdata >= 1.5 then
+		gui.timer:action_cb()
+		gui.timer.run = "YES"
+		--gui.dialog.hidetaskbar = "YES"
+	else
+		gui.status.title = string.format(
+	[[
+	Sua última sincronização foi a menos
+	de %d minuto. Talvez já tenha um servidor
+	rodando. Senão tente mais tarde.
+	]], min)
+	end
 end
 
 return act

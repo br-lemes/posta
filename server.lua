@@ -11,4 +11,5 @@ iup.SetGlobal("UTF8MODE_FILE", "YES")
 iup.SetGlobal("LANGUAGE", "PORTUGUESE")
 
 gui.dialog:show()
+gui.init()
 iup.MainLoop()
