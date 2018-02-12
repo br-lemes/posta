@@ -70,12 +70,13 @@ gui.timer = iup.timer{
 }
 
 function gui.timer:action_cb()
-	local date = os.date("*t")
-	if date.hour > 7 and date.hour < 19 and date.wday ~= 1
-		and date.wday ~= 7 then -- custom sábado
-		gui.status.title = sro.import()
-	end
 	act.clean()
+	if not act.force then
+		local date = os.date("*t")
+		if date.hour < 7 or date.hour > 19 or date.wday == 1
+			or date.wday == 7 then return end -- custom sábado
+	end
+	gui.status.title = sro.import()
 end
 
 gui.server.title = "Concentrador SRO: " .. sro.server
@@ -87,12 +88,13 @@ function gui.init()
 		gui.timer.run = "YES"
 		--gui.dialog.hidetaskbar = "YES"
 	else
+		fun.dofile("data/ready.lua")
 		gui.status.title = string.format(
 	[[
-	Sua última sincronização foi a menos
-	de %d minuto. Talvez já tenha um servidor
-	rodando. Senão tente mais tarde.
-	]], act.min)
+Sua última sincronização foi a menos
+de %d minuto. Talvez já tenha um servidor
+rodando. Senão tente mais tarde.
+Servidor: %s]], act.min, fun.data.server or "")
 	end
 end
 

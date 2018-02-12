@@ -125,8 +125,9 @@ local function import()
 	con_sro:close()
 	env_sro:close()
 	ready = io.open("data/ready.lua", "w")
-	ready:write(string.format("ready = %q\n", dsuffix))
+	ready:write(string.format("ready = %q\nserver = %q\n", dsuffix, os.getenv("COMPUTERNAME") or ""))
 	ready:close()
+	io.stdout:flush()
 	return string.format("Sincronizado em %ss.\nNo dia %s.",
 		os.clock()-start, dsuffix)
 end
