@@ -3,8 +3,7 @@ local iup = require("iuplua")
 local fun = require("functions")
 local gui = require("server.layout")
 local sro = require("server.import")
-local act = { }
-local min = 1
+local act = { min = 1 }
 
 -- action functions
 
@@ -67,7 +66,7 @@ function gui.dialog:trayclick_cb(b, press, dclick)
 end
 
 gui.timer = iup.timer{
-	time = 1000 * (min * 60)
+	time = 1000 * (act.min * 60)
 }
 
 function gui.timer:action_cb()
@@ -93,7 +92,7 @@ function gui.init()
 	Sua última sincronização foi a menos
 	de %d minuto. Talvez já tenha um servidor
 	rodando. Senão tente mais tarde.
-	]], min)
+	]], act.min)
 	end
 end
 
