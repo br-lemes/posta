@@ -1,5 +1,6 @@
 
 local iup = require("iuplua")
+local fun = require("functions")
 local csv = require("client.csvutils")
 local eng = require("client.engine")
 local gui = require("client.layout")
@@ -28,7 +29,7 @@ function act.delete()
 			if arq then
 				if arq:write(v.LTD_ITEMCODE, "\n") then
 					arq:close()
-					for _i, _v in ipairs(srodata) do
+					for _i, _v in ipairs(fun.data.srodata) do
 						if _v.LTD_ITEMCODE == v.LTD_ITEMCODE then
 							table.remove(srodata, _i)
 							break
@@ -297,7 +298,7 @@ function gui.result:dblclick_cb(item, text, copy)
 			gui.rload()
 		else
 			local s = ""
-			for i,v in ipairs(ldidata[v]) do
+			for i,v in ipairs(fun.data.ldidata[v]) do
 				s = string.format("%s%s,,%d,%s,,%s,,,,,,,,,%s,%s\n", s, v.LTD_ITEMCODE, v.LTD_GROUPNUMBER, v.CS_NAME, v.LTD_COMMENT, v.LTD_ID, v.OBJ_TYPE)
 			end
 			act.clipboard.text = nil

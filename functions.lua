@@ -1,6 +1,17 @@
 
 local lfs = require("lfs")
-local fun = { }
+local fun = { data = { table = { insert = table.insert } } }
+
+function fun.dofile(name)
+	local f, msg = loadfile(name, "t", fun.data)
+	if f then
+		if setfenv then setfenv(f, fun.data) end
+		f, msg = pcall(f)
+		if not f then error(msg) end
+	else
+		error(msg)
+	end
+end
 
 function fun.alldata()
 	local data = { }

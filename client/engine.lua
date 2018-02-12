@@ -5,12 +5,12 @@ local eng = { }
 
 function eng.load()
 	local dsuffix = fun.lastdata()
-	dofile("data/ready.lua")
-	if dsuffix ~= ready then
+	fun.dofile("data/ready.lua")
+	if dsuffix ~= fun.data.ready then
 		dsuffix = fun.prevdata()
 	end
-	dofile(string.format("data/srodata-%s.lua", dsuffix))
-	dofile(string.format("data/ldidata-%s.lua", dsuffix))
+	fun.dofile(string.format("data/srodata-%s.lua", dsuffix))
+	fun.dofile(string.format("data/ldidata-%s.lua", dsuffix))
 	eng.delete = { }
 	eng.simple = { }
 	local arq = io.open("data/delete.csv", "r")
@@ -121,7 +121,7 @@ function eng.search(options)
 	local r = { }
 	options = eng.check_options(options)
 	if options.sby == 1 then -- LDI
-		for k,v in pairs(ldidata) do
+		for k,v in pairs(fun.data.ldidata) do
 			local a, b
 			a, b = pcall(string.find, k, options.search)
 			if a and b and v[1].LTD_HITUNITCEP == options.unit then
@@ -130,7 +130,7 @@ function eng.search(options)
 		end
 		table.sort(r)
 	else
-		for i,v in ipairs(srodata) do
+		for i,v in ipairs(fun.data.srodata) do
 			local a, b, c
 			if options.search:find("^AR%d%d%d%d%d%d%d%d%d%a%a$") then
 				a, b = pcall(string.find, v.LTD_ITEMCODE, options.search:gsub("^AR(%d%d%d%d%d%d%d%d%d)%a%a$", "%%a%%a%1%%a%%a"))
