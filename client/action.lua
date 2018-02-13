@@ -109,7 +109,7 @@ function gui.rload()
 	gui.load_timer.run = "NO"
 	gui.details.title = ""
 	local dsuffix = fun.diffdata(act.dsuffix)
-	if not dsufix or dsuffix > 5 then
+	if not dsuffix or dsuffix > 5 then
 		gui.b_zbox.value = gui.ancient_box
 	else
 		gui.b_zbox.value = gui.icons_box
