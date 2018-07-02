@@ -35,6 +35,8 @@ local function import()
 	local cur, err = con_sro:execute([[
 		SELECT
 			CUSTOMER.CS_NAME,
+			CUSTOMER.CS_PHONENUMBER,
+			CUSTOMER.CS_CELLNUMBER,
 			LAUNCHTODLVRY.LTD_ID,
 			LAUNCHTODLVRY.LTD_CREATETIME,
 			LAUNCHTODLVRY.LTD_HITUNITCEP,
@@ -72,19 +74,21 @@ local function import()
 			row.LTD_ITEMCODE = row.LTD_ITEMCODE:upper()
 			if not ignore[row.LTD_ITEMCODE] then
 				row.CS_NAME = row.CS_NAME and row.CS_NAME:upper() or ""
+				row.CS_PHONENUMBER = row.CS_PHONENUMBER or ""
+				row.CS_CELLNUMBER = row.CS_CELLNUMBER or ""
 				row.LTD_COMMENT = row.LTD_COMMENT:upper() or ""
 				-- custom [[
 				if tonumber(row.LTD_ITEMDESTINY) == 2 then
 					row.OBJ_TYPE = "postal"
-				elseif row.CS_NAME:find("4%d%[. ]?%d%d%d") or row.LTD_COMMENT:find("INT") then
+				elseif row.CS_NAME:find("4%d[. ]?%d%d%d") or row.LTD_COMMENT:find("INT") then
 					row.OBJ_TYPE = "intern"
-				elseif row.CS_NAME:find("1%d%[. ]?%d%d%d") or row.LTD_COMMENT:find("VOL") or row.LTD_COMMENT:find("PCTE") then
+				elseif row.CS_NAME:find("1%d[. ]?%d%d%d") or row.LTD_COMMENT:find("VOL") or row.LTD_COMMENT:find("PCTE") then
 					row.OBJ_TYPE = "volume"
-				elseif row.CS_NAME:find("2%d%[. ]?%d%d%d") or (row.LTD_COMMENT:find("ENV") and row.LTD_COMMENT:find("SS")) or row.LTD_COMMENT:find("SEDEX") then
+				elseif row.CS_NAME:find("2%d[. ]?%d%d%d") or (row.LTD_COMMENT:find("ENV") and row.LTD_COMMENT:find("SS")) or row.LTD_COMMENT:find("SEDEX") then
 					row.OBJ_TYPE = "envsed"
-				elseif row.CS_NAME:find("3%d%[. ]?%d%d%d") or (row.LTD_COMMENT:find("ENV") and row.LTD_COMMENT:find("RE")) or row.LTD_COMMENT:find("REG") then
+				elseif row.CS_NAME:find("3%d[. ]?%d%d%d") or (row.LTD_COMMENT:find("ENV") and row.LTD_COMMENT:find("RE")) or row.LTD_COMMENT:find("REG") then
 					row.OBJ_TYPE = "envreg"
-				elseif row.CS_NAME:find("5%d%[. ]?%d%d%d") or row.LTD_COMMENT:find("COBRAR") then
+				elseif row.CS_NAME:find("5%d[. ]?%d%d%d") or row.LTD_COMMENT:find("COBRAR") then
 					row.OBJ_TYPE = "cobrar"
 				else
 					row.OBJ_TYPE = "outros"
@@ -92,6 +96,8 @@ local function import()
 				-- ]]
 				srodata:write("\t{\n")
 				srodata:write(string.format("\t\tCS_NAME         = %q,\n", row.CS_NAME))
+				srodata:write(string.format("\t\tCS_PHONENUMBER  = %q,\n", row.CS_PHONENUMBER))
+				srodata:write(string.format("\t\tCS_CELLNUMBER   = %q,\n", row.CS_CELLNUMBER))
 				srodata:write(string.format("\t\tLTD_ID          = %q,\n", row.LTD_ID))
 				srodata:write(string.format("\t\tLTD_CREATETIME  = %q,\n", row.LTD_CREATETIME))
 				srodata:write(string.format("\t\tLTD_HITUNITCEP  = %q,\n", row.LTD_HITUNITCEP))
