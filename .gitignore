@@ -1,3 +1,5 @@
+*.csv
+civetweb.exe
 client.exe
 data
 hibernate.cfg.xml
@@ -5,7 +7,9 @@ iup.dll
 iuplua51.dll
 lfs.dll
 libmysql.dll
+libwinpthread-1.dll
 lua5.1.dll
 luasql
+qrencode.exe
 server.exe
 SciTE.properties
