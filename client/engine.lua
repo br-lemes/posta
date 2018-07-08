@@ -3,6 +3,37 @@ local fun = require("functions")
 local csv = require("client.csvutils")
 local eng = { }
 
+function eng.convertdate(date)
+	local t = { }
+	t.day, t.month, t.year = date:match("(%d%d?)[./-](%d%d?)[./-](%d%d%d%d)")
+	if not t.day then
+		t.day, t.month, t.year = date:match("(%d%d?)[./-](%d%d?)[./-](%d%d)")
+		if not t.day or not t.month or not t.year then
+			return nil
+		end
+		t.year = t.year + 2000
+	end
+	return os.date("%Y-%m-%d", os.time(t))
+end
+
+function eng.late(date, lasttime, today)
+	local t = { }
+	t.day, t.month, t.year = date:match("(%d%d?)[./-](%d%d?)[./-](%d%d%d%d)")
+	if not t.day then
+		t.day, t.month, t.year = date:match("(%d%d?)[./-](%d%d?)[./-](%d%d)")
+		if not t.day or not t.month or not t.year then
+			return true
+		end
+		t.year = t.year + 2000
+	end
+	t.day = t.day + lasttime
+	if today then
+		return os.date("%Y-%m-%d") >= os.date("%Y-%m-%d", os.time(t))
+	else
+		return os.date("%Y-%m-%d") > os.date("%Y-%m-%d", os.time(t))
+	end
+end
+
 function eng.load()
 	local dsuffix = fun.lastdata()
 	if dsuffix then
@@ -30,18 +61,18 @@ function eng.load()
 	if not arq then return dsuffix end
 	for line in arq:lines() do
 		line = line:upper():gsub("–", "-"):gsub(",*$", "")
-		if line ~= "" and not eng.delete[line] then
+		if line ~= "" and not eng.delete[line] and line ~= "TIPO,DATA,ORDEM,NOME" then
 			local t = csv.from(line)
 			if type(t) == "table" and type(t[1]) == "string" and type(t[2]) == "string" and type(t[3]) == "string" and type(t[4]) == "string" and t[4] ~= "" then
-				if t[3]:find("1%d%[. ]?%d%d%d") or t[1]:find("VOL") then
+				if t[3]:find("1%d[. ]?%d%d%d") or t[1]:find("VOL") then
 					t.OBJ_TYPE = "volume"
-				elseif t[3]:find("2%d%[. ]?%d%d%d") or t[1] == "SEDEX" then
+				elseif t[3]:find("2%d[. ]?%d%d%d") or t[1] == "SEDEX" then
 					t.OBJ_TYPE = "envsed"
-				elseif t[3]:find("3%d%[. ]?%d%d%d") or t[1] == "SEED" then
+				elseif t[3]:find("3%d[. ]?%d%d%d") or t[1] == "SEED" then
 					t.OBJ_TYPE = "envreg"
-				elseif t[3]:find("4%d%[. ]?%d%d%d") or t[1]:find("CAIXETA") or t[1]:find("CAIXA") or t[1]:find("CX") then
+				elseif t[3]:find("4%d[. ]?%d%d%d") or t[1]:find("CAIXETA") or t[1]:find("CAIXA") or t[1]:find("CX") then
 					t.OBJ_TYPE = "intern"
-				elseif t[3]:find("5%d%[. ]?%d%d%d") or t[1]:find("COBRAR") then
+				elseif t[3]:find("5%d[. ]?%d%d%d") or t[1]:find("COBRAR") then
 					t.OBJ_TYPE = "cobrar"
 				else
 					t.OBJ_TYPE = "simple"
@@ -117,7 +148,6 @@ function eng.check_options(options)
 	if options.intern == nil then options.intern = true end
 	if options.volume == nil then options.volume = true end
 	-- options.postal == nil é o mesmo que false
-	options.max    = options.max   or 50
 	options.sby    = options.sby   or 2
 	options.unit   = options.unit  or "78455970" -- custom
 	options.order  = options.order or "CS_NAME"
@@ -182,27 +212,30 @@ function eng.search(options)
 			end
 		end
 		for i,v in ipairs(eng.simple) do
-			local a, b -- TODO late
+			local a, b, c
 			if not options.late then
-				if options.sby == 2 then -- Nome
-					a, b = pcall(string.find, v[4], options.search)
-				elseif options.sby == 4 then -- Número
-					a, b = pcall(string.find, v[3], options.search)
-				end
-				if a and b then
-					if v.OBJ_TYPE == "simple" and options.simple then
-						table.insert(r, v)
-					elseif v.OBJ_TYPE == "envreg" and options.envreg then
-						table.insert(r, v)
-					elseif v.OBJ_TYPE == "envsed" and options.envsed then
-						table.insert(r, v)
-					elseif v.OBJ_TYPE == "intern" and options.intern then
-						table.insert(r, v)
-					elseif v.OBJ_TYPE == "volume" and options.volume then
-						table.insert(r, v)
-					elseif v.OBJ_TYPE == "cobrar" and options.cobrar then
-						table.insert(r, v)
-					end
+				c = true
+			else
+				c = eng.late(v[2], 20, options.ltoday)
+			end
+			if options.sby == 2 then -- Nome
+				a, b = pcall(string.find, v[4], options.search)
+			elseif options.sby == 4 then -- Número
+				a, b = pcall(string.find, v[3], options.search)
+			end
+			if a and b and c then
+				if v.OBJ_TYPE == "simple" and options.simple then
+					table.insert(r, v)
+				elseif v.OBJ_TYPE == "envreg" and options.envreg then
+					table.insert(r, v)
+				elseif v.OBJ_TYPE == "envsed" and options.envsed then
+					table.insert(r, v)
+				elseif v.OBJ_TYPE == "intern" and options.intern then
+					table.insert(r, v)
+				elseif v.OBJ_TYPE == "volume" and options.volume then
+					table.insert(r, v)
+				elseif v.OBJ_TYPE == "cobrar" and options.cobrar then
+					table.insert(r, v)
 				end
 			end
 		end
@@ -233,7 +266,21 @@ function eng.sortlate(a, b)
 	elseif not a.LTD_ID and b.LTD_ID then
 		return false
 	elseif not a.LTD_ID and not b.LTD_ID then
-		return a[4] < b[4]
+		local date_a = eng.convertdate(a[2])
+		local date_b = eng.convertdate(b[2])
+		if date_a and not date_b then
+			return true
+		elseif not date_a and not date_b then
+			return true
+		elseif not date_a and date_b then
+			return false
+		elseif date_a < date_b then
+			return true
+		elseif date_a > date_b then
+			return false
+		else
+			return a[3] < b[3]
+		end
 	end
 end
 

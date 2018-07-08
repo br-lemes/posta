@@ -29,12 +29,7 @@ function act.delete()
 			if arq then
 				if arq:write(v.LTD_ITEMCODE, "\n") then
 					arq:close()
-					for _i, _v in ipairs(fun.data.srodata) do
-						if _v.LTD_ITEMCODE == v.LTD_ITEMCODE then
-							table.remove(srodata, _i)
-							break
-						end
-					end
+					eng.load()
 					gui.rload()
 					iup.SetFocus(gui.search)
 				else
@@ -52,12 +47,7 @@ function act.delete()
 				local s = csv.to(v)
 				if arq:write(s, "\n") then
 					arq:close()
-					for _i, _v in ipairs(eng.simple) do
-						if _v == v then
-							table.remove(eng.simple, _i)
-							break
-						end
-					end
+					eng.load()
 					gui.rload()
 					iup.SetFocus(gui.search)
 				else
@@ -270,7 +260,11 @@ function gui.result:valuechanged_cb()
 			elseif v[4] then
 				gui.details.title = string.format(
 					"Tipo: %s - Número: %s - Data: %s\n", v[1], v[3], v[2])
-				-- TODO late
+				if eng.late(v[2], 20) then
+					gui.details.fgcolor = "255 0 0"
+				else
+					gui.details.fgcolor = "0 0 0"
+				end
 			end
 		end
 	end
