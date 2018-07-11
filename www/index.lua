@@ -1,6 +1,5 @@
 
 local day = os.date("%Y-%m-%d")
---local day = "2018-07-05"
 local ucep = "78455970"
 local only = true
 
@@ -177,6 +176,46 @@ function sro(ret)
 			if only and phone == "" and cell == "" then break end
 			local date = v.LTD_CREATETIME:sub(1, 10)
 			if day and day ~= date then break end
+			local lasttime = v.LTD_LASTTIME
+			if lattime == "" or lasttime == "0" or lasttime == 0 then
+				local default = {
+					{"^A" , 20},
+					{"^BF",  7},
+					{"^B" , 20},
+					{"^C" , 20},
+					{"^D" ,  7},
+					{"^E" ,  7},
+					{"^F" , 20},
+					{"^I" , 20}, -- ???
+					{"^J" , 20},
+					{"^LA",  7},
+					{"^LB",  7}, -- Internacional 20, nacional 7
+					{"^LP",  7},
+					{"^LS",  7},
+					{"^LV",  7},
+					{"^L" , 20},
+					{"^MH", 20},
+					{"^M" ,  7},
+					{"^N" , 20},
+					{"^O" ,  7},
+					{"^P" ,  7}, -- Reembolso postal PR (ainda existe) Passaporte PA e PF ???
+					{"^R" , 20},
+					{"^S" ,  7},
+					{"^T" , 20}, -- Teste
+					{"^V" , 20},
+					{"^X" , 20}, -- ???
+				}
+				if v.LTD_ITEMCODE ~= "BR" then
+					lasttime = 20
+				else
+					for i, v in pairs(default) do
+						if v.LTD_ITEMCODE:match(v[1]) then
+							lasttime = v[2]
+							break
+						end
+					end
+				end
+			end
 			table.insert(ret, {
 				heading = string.format("%s - %s", v.CS_NAME, v.LTD_ITEMCODE),
 				name     = name,
@@ -184,7 +223,7 @@ function sro(ret)
 				phone    = phone,
 				cell     = cell,
 				date     = date,
-				deadline = deadline(date, v.LTD_LASTTIME),
+				deadline = deadline(date, lasttime),
 				lock     = v.LTD_ITEMCODE,
 				origin   = v.LTD_ITEMCODE:match("BR$") and "nacional" or "internacional"
 			})
