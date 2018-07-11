@@ -215,6 +215,9 @@ function sro(ret)
 						end
 					end
 				end
+				if tonumber(os.date("%H")) < 12 then
+					lasttime = lasttime + 1
+				end
 			end
 			table.insert(ret, {
 				heading = string.format("%s - %s", v.CS_NAME, v.LTD_ITEMCODE),
