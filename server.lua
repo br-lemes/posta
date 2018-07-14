@@ -12,5 +12,6 @@ iup.SetGlobal("LANGUAGE", "PORTUGUESE")
 
 act.force = arg[1] == "force" or arg[1] == "--force" or arg[1] == "-f"
 gui.dialog:show()
+gui.dialog.hidetaskbar = "YES"
 gui.init()
 iup.MainLoop()

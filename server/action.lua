@@ -86,7 +86,6 @@ function gui.init()
 	if not diffdata or diffdata >= 1.5 then
 		gui.timer:action_cb()
 		gui.timer.run = "YES"
-		--gui.dialog.hidetaskbar = "YES"
 	else
 		fun.dofile("data/ready.lua")
 		gui.status.title = string.format(
