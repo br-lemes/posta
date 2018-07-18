@@ -6,6 +6,8 @@ local only = true
 package.loaded.lfs = lfs
 local fun = require("functions")
 local csv = require("client.csvutils")
+local qrencode = require("qrencode")
+local mustache = require("mustache")
 
 mg.write([[
 HTTP/1.0 200 OK
@@ -49,15 +51,41 @@ function exists(name)
 	return mode ~= nil
 end
 
-function qrencode(name, data)
-	if not exists(name) then
-		local h = io.popen(string.format("qrencode -t svg -o %q",
-			string.format("www/img/%s.svg", name)), "w")
-		h:write(data)
-		h:close()
-		return true
+local template = [[
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<svg width="{{cm}}cm" height="{{cm}}cm" viewBox="0 0 {{size}} {{size}}" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<g id="QRcode">
+		<rect x="0" y="0" width="{{size}}" height="{{size}}" fill="{{bg}}"/>
+		<g id="Pattern" transform="translate(4,4)">
+		{{#data}}
+			<rect x="{{x}}" y="{{y}}" width="1" height="1" fill="{{fg}}"/>
+		{{/data}}
+		</g>
+	</g>
+</svg>
+]]
+
+function qrcode(name, data, bg, fg)
+	if exists(name) then return false end
+	local ok, code = qrencode.qrcode(data)
+	if not ok then return false end
+	local view = { size = #code + 8 }
+	view.cm = string.format("%.2f", view.size * 3 / 28.35)
+	view.bg = bg ~= "" and bg or "#ffffff"
+	view.fg = fg ~= "" and fg or "#000000"
+	view.data = { }
+	for x, v in pairs(code) do
+		for y, v in pairs(v) do
+			if v > 0 then
+				table.insert(view.data, {x = x - 1, y = y - 1})
+			end
+		end
 	end
-	return false
+	local h = io.open(string.format("www/img/%s.svg", name), "w")
+	if not h then return false end
+	h:write(mustache.render(template, view))
+	h:close()
+	return true
 end
 
 function phone_decode(phone)
@@ -249,7 +277,7 @@ for i,v in pairs(ret) do
 		mg.write("\t<h1 id=", i, ">", v.heading, "</h1>\n")
 		mg.write('\t<div class="qrcode">\n')
 		local fmt = '\t\t<div class="%s"><img src="img/%s.svg"></div>\n'
-		if qrencode(v.fname, v.name) then
+		if qrcode(v.fname, v.name) then
 			mg.write(string.format(fmt, "new", v.fname))
 		else
 			mg.write(string.format(fmt, "old", v.fname))
@@ -267,7 +295,7 @@ for i,v in pairs(ret) do
 			end
 		end
 		if phone ~= "" or cell ~= "" then
-			if qrencode(v.fname .. "vcf", vcard) then
+			if qrcode(v.fname .. "vcf", vcard) then
 				mg.write(string.format(fmt, "new", v.fname .. "vcf"))
 			else
 				mg.write(string.format(fmt, "old", v.fname .. "vcf"))
@@ -282,14 +310,14 @@ for i,v in pairs(ret) do
 		local msg = "%s? %s! Eu trabalho nos Correios. Tem uma encomenda para você. Precisa vir buscar aqui na agência. O prazo é até dia %s. Se você precisar que outra pessoa retire para você, precisa de uma autorização por escrito e cópia ou original da sua identidade."
 		msg = string.format(msg, v.name, tonumber(os.date("%H")) < 12 and "Bom dia" or "Boa tarde", v.deadline)
 		if phone ~= "" then
-			if qrencode(v.fname .. v.date, string.format("https://api.whatsapp.com/send?phone=%s&text=%s",
+			if qrcode(v.fname .. v.date, string.format("https://api.whatsapp.com/send?phone=%s&text=%s",
 				v.phone, mg.url_encode(msg))) then
 				mg.write(string.format(fmt, "click", v.fname .. v.date))
 			else
 				mg.write(string.format(fmt, "old", v.fname .. v.date))
 			end
 		else
-			if qrencode(v.name .. v.date, msg) then
+			if qrcode(v.name .. v.date, msg) then
 				mg.write(string.format(fmt, "new", v.fname .. v.date))
 			else
 				mg.write(string.format(fmt, "old", v.fname .. v.date))
