@@ -2,6 +2,8 @@
 local lfs = require("lfs")
 local fun = { data = { table = { insert = table.insert } } }
 
+-- TODO: receber somente o nome, calcular dsuffix e retornar vazio caso
+-- ausente ou ocorrer algum erro
 function fun.dofile(name)
 	local f, msg = loadfile(name, "t", fun.data)
 	if f then

@@ -87,13 +87,15 @@ function gui.init()
 		gui.timer:action_cb()
 		gui.timer.run = "YES"
 	else
-		fun.dofile("data/ready.lua")
+		h = io.open("data/server", "r")
+		local server = h:read("*a")
+		h:close()
 		gui.status.title = string.format(
 	[[
 Sua última sincronização foi a menos
 de %d minuto. Talvez já tenha um servidor
 rodando. Senão tente mais tarde.
-Servidor: %s]], act.min, fun.data.server or "")
+Servidor: %s]], act.min, server)
 	end
 end
 

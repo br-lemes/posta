@@ -183,15 +183,9 @@ end
 function sro(ret)
 	local dsuffix = fun.lastdata()
 	if dsuffix then
-		fun.dofile("data/ready.lua")
-		if dsuffix ~= fun.data.ready then
-			dsuffix = fun.prevdata()
-		end
 		fun.dofile(string.format("data/srodata-%s.lua", dsuffix))
 	else
 		fun.data.srodata = { }
-		fun.data.ldidata = { }
-		fun.data.ready   = ""
 	end
 	for i,v in ipairs(fun.data.srodata) do
 		repeat

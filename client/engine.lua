@@ -37,16 +37,11 @@ end
 function eng.load()
 	local dsuffix = fun.lastdata()
 	if dsuffix then
-		fun.dofile("data/ready.lua")
-		if dsuffix ~= fun.data.ready then
-			dsuffix = fun.prevdata()
-		end
 		fun.dofile(string.format("data/srodata-%s.lua", dsuffix))
 		fun.dofile(string.format("data/ldidata-%s.lua", dsuffix))
 	else
 		fun.data.srodata = { }
 		fun.data.ldidata = { }
-		fun.data.ready   = ""
 	end
 	eng.delete = { }
 	eng.simple = { }
