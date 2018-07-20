@@ -300,7 +300,7 @@ for i,v in pairs(ret) do
 		msg = string.format(msg, v.name, tonumber(os.date("%H")) < 12 and "Bom dia" or "Boa tarde", v.deadline)
 		if phone ~= "" then
 			if qrcode(v.fname .. v.date, string.format("https://api.whatsapp.com/send?phone=%s&text=%s",
-				v.phone, mg.url_encode(msg))) then
+				v.phone ~= "" and v.phone or v.cell, mg.url_encode(msg))) then
 				mg.write(string.format(fmt, "click", v.fname .. v.date))
 			else
 				mg.write(string.format(fmt, "old", v.fname .. v.date))
