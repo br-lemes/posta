@@ -181,12 +181,7 @@ function simples(ret)
 end
 
 function sro(ret)
-	local dsuffix = fun.lastdata()
-	if dsuffix then
-		fun.dofile(string.format("data/srodata-%s.lua", dsuffix))
-	else
-		fun.data.srodata = { }
-	end
+	fun.dofile("srodata", fun.lastdata())
 	for i,v in ipairs(fun.data.srodata) do
 		repeat
 			if v.LTD_HITUNITCEP ~= ucep then break end
