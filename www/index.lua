@@ -259,7 +259,7 @@ local first = true
 for i,v in pairs(ret) do
 	if not exists(v.lock) then
 		touch(v.lock)
-		if fisrt then
+		if not first then
 			mg.write('\t<h2>[ <a href="#', i, '">Próximo</a> ]</h2>')
 			first = false
 		end
