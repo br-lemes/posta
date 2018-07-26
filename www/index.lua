@@ -272,18 +272,18 @@ for i,v in pairs(ret) do
 			mg.write(string.format(fmt, "old", v.fname))
 		end
 		local vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:C - %s\nTEL;TYPE=CELL:%s\nNOTE:Origem: Encomenda %s\nEND:VCARD\n"
-		if phone ~= "" and cell ~= "" then
+		if v.phone ~= "" and v.cell ~= "" then
 			vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:C - %s\nTEL;TYPE=CELL:%s\nTEL;TYPE=CELL:%s\nNOTE:Origem: Encomenda %s\nEND:VCARD\n"
 			vcard = string.format(vcard, v.name, phone_encode(v.phone), phone_encode(v.cell), v.origin)
 		else
-			if phone ~= "" then
+			if v.phone ~= "" then
 				vcard = string.format(vcard, v.name, phone_encode(v.phone), v.origin)
 			end
-			if cell ~= "" then
+			if v.cell ~= "" then
 				vcard = string.format(vcard, v.name, phone_encode(v.cell), v.origin)
 			end
 		end
-		if phone ~= "" or cell ~= "" then
+		if v.phone ~= "" or v.cell ~= "" then
 			if qrcode(v.fname .. "vcf", vcard) then
 				mg.write(string.format(fmt, "new", v.fname .. "vcf"))
 			else
@@ -298,7 +298,7 @@ for i,v in pairs(ret) do
 		end
 		local msg = "%s? %s! Eu trabalho nos Correios. Tem uma encomenda para você. Precisa vir buscar aqui na agência. O prazo é até dia %s. Se você precisar que outra pessoa retire para você, precisa de uma autorização por escrito e cópia ou original da sua identidade."
 		msg = string.format(msg, v.name, tonumber(os.date("%H")) < 12 and "Bom dia" or "Boa tarde", v.deadline)
-		if phone ~= "" then
+		if v.phone ~= "" then
 			if qrcode(v.fname .. v.date, string.format("https://api.whatsapp.com/send?phone=%s&text=%s",
 				v.phone ~= "" and v.phone or v.cell, mg.url_encode(msg))) then
 				mg.write(string.format(fmt, "click", v.fname .. v.date))
