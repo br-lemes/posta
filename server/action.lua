@@ -9,7 +9,7 @@ local act = { min = 1 }
 
 function act.clean()
 	local data = fun.alldata()
-	for i,v in pairs(data) do
+	for _,v in pairs(data) do
 		local diffdata = fun.diffdata(v)
 		if diffdata > 30 * 24 * 60 or (diffdata > 60  and v:match("(%d%d)m") ~= "00") then
 			os.remove(string.format("data/srodata-%s.lua", v))
@@ -50,7 +50,7 @@ end
 
 local count = 0
 
-function gui.dialog:trayclick_cb(b, press, dclick)
+function gui.dialog:trayclick_cb(b, press)
 	if b == 1 and press then
 		if count == 0 then
 			if self.visible == "YES" then

@@ -8,11 +8,11 @@ function csv.from(s)
 	repeat
 		-- next field is quoted? (start with `"'?)
 		if s:find('^"', fieldstart) then
-			local a, c
+			local c
 			local i  = fieldstart
 			repeat
 				-- find closing quote
-				a, i, c = s:find('"("?)', i + 1)
+				_, i, c = s:find('"("?)', i + 1)
 			until c ~= '"' -- quote not followed by quote?
 			if not i then error('unmatched "') end
 			local f = s:sub(fieldstart + 1, i - 1)

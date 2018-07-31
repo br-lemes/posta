@@ -11,7 +11,7 @@ local function convert(name)
 	arq:write(string.format("ico.%s = iup.imagergba {\n\twidth  = %d,\n\theight = %d,\n\tpixels = {",
 		name, ico.width, ico.height))
 	local count = 0
-	for i, v in ipairs(ico.pixels) do
+	for _, v in ipairs(ico.pixels) do
 		if count == 0 then
 			arq:write("\n\t\t")
 		end

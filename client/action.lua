@@ -297,7 +297,7 @@ function gui.result:dblclick_cb(item, text, copy)
 			gui.rload()
 		else
 			local s = ""
-			for i,v in ipairs(fun.data.ldidata[v]) do
+			for _,v in ipairs(fun.data.ldidata[v]) do
 				s = string.format("%s%s,,%d,%s,,%s,,,,,,,,,%s,%s\n", s, v.LTD_ITEMCODE, v.LTD_GROUPNUMBER, v.CS_NAME, v.LTD_COMMENT, v.LTD_ID, v.OBJ_TYPE)
 			end
 			act.clipboard.text = nil
