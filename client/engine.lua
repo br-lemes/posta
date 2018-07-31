@@ -47,7 +47,7 @@ function eng.load()
 		end
 		arq:close()
 	end
-	local arq = io.open("Posta Restante.csv", "r")
+	arq = io.open("Posta Restante.csv", "r")
 	if not arq then return dsuffix end
 	for line in arq:lines() do
 		line = line:upper():gsub("–", "-"):gsub(",*$", "")
@@ -157,7 +157,7 @@ function eng.search(options)
 		end
 		table.sort(r)
 	else
-		for i,v in ipairs(fun.data.srodata) do
+		for _,v in ipairs(fun.data.srodata) do
 			local a, b, c
 			if options.search:find("^AR%d%d%d%d%d%d%d%d%d%a%a$") then
 				a, b = pcall(string.find, v.LTD_ITEMCODE, options.search:gsub("^AR(%d%d%d%d%d%d%d%d%d)%a%a$", "%%a%%a%1%%a%%a"))
@@ -201,7 +201,7 @@ function eng.search(options)
 				end
 			end
 		end
-		for i,v in ipairs(eng.simple) do
+		for _,v in ipairs(eng.simple) do
 			local a, b, c
 			if not options.late then
 				c = true

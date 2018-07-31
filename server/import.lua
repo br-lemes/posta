@@ -5,9 +5,10 @@ local cfg = require("config")
 
 local function import()
 	local start, ignore = os.clock(), { }
-	local env_sro, err = luasql.mysql()
+	local env_sro, con_sro, err
+	env_sro, err = luasql.mysql()
 	if not env_sro then return err end
-	local con_sro, err = env_sro:connect(
+	con_sro, err = env_sro:connect(
 		cfg.database,
 		cfg.user,
 		cfg.password,
@@ -24,7 +25,8 @@ local function import()
 	end
 	local count = 1
 	local ldi = { }
-	local cur, err = con_sro:execute([[
+	local cur
+	cur, err = con_sro:execute([[
 		SELECT
 			CUSTOMER.CS_NAME,
 			CUSTOMER.CS_PHONENUMBER,
