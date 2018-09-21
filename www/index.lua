@@ -92,7 +92,7 @@ function phone_decode(phone)
 	-- Somente DDI de 2 dígitos
 	-- DDI padrão 55 - Brasil
 	-- DDD padrão 65 - Mato Grosso
-	if not phone or phone == "" or phone:find("[^0-9()+%- ]") then return "" end
+	if not phone or phone == "" or phone:find("[^%d%p]") then return "" end
 	phone = phone:gsub(".", function(c) if tonumber(c) ~= nil then return c else return "" end end)
 	if #phone == 8 then phone = "5565" .. phone end
 	if #phone == 9 and phone:sub(1, 1) == "9" then
@@ -191,6 +191,12 @@ function sro(ret)
 			local phone = phone_decode(v.CS_PHONENUMBER)
 			local cell = phone_decode(v.CS_CELLNUMBER)
 			if only and phone == "" and cell == "" then break end
+			if phone == "" and cell ~= "" then
+				-- inverte para que seja gerado corretamente o QRCode com o
+				-- link Click to Chat.
+				phone = cell
+				cell = ""
+			end
 			local date = v.LTD_CREATETIME:sub(1, 10)
 			if day and day ~= date then break end
 			local lasttime = v.LTD_LASTTIME
