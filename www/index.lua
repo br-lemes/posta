@@ -180,6 +180,37 @@ function simples(ret)
 	end
 end
 
+function resgate(ret)
+	local h = io.open("resgate.csv", "r")
+	if h then
+		for line in h:lines() do
+			line = line:upper():gsub("–", "-"):gsub(",*$", ""):gsub("%s$", "")
+			if line ~= "" then
+				local t = csv.from(line)
+				if type(t) == "table" and type(t[1]) == "string" and type(t[2]) == "string" and type(t[3]) == "string" and type(t[4]) == "string" and type(t[5]) == "string" then
+					local name    = t[4]:gsub("^[%A]+", ""):gsub("[%A]+$", ""):gsub("%f[%a]%a-%f[%A]", capital)
+					local phone   = phone_decode(t[5])
+					local date    = convert(t[2])
+					if name ~= "" and phone ~= "" and not (day and day ~= date) then
+						table.insert(ret, {
+							heading  = string.format("%s - %s - %s", t[3], t[4], t[1]),
+							name     = name,
+							fname    = name:gsub("[\\/:*?\"<>|]", "~"),
+							phone    = phone,
+							cell     = "",
+							date     = date,
+							deadline = deadline(date, 20),
+							lock     = string.format("%s-%s-%s", date, t[3], name:gsub("[\\/:*?\"<>|]", "~")),
+							origin   = "simples",
+						})
+					end
+				end
+			end
+		end
+		h:close()
+	end
+end
+
 function sro(ret)
 	fun.dofile("srodata", fun.lastdata())
 	for i,v in ipairs(fun.data.srodata) do
@@ -304,6 +335,70 @@ for i,v in pairs(ret) do
 		end
 		local msg = "%s? %s! Eu trabalho nos Correios. Tem uma encomenda para você. Precisa vir buscar aqui na agência. O prazo é até dia %s. Se você precisar que outra pessoa retire para você, precisa de uma autorização por escrito e cópia ou original da sua identidade."
 		msg = string.format(msg, v.name, tonumber(os.date("%H")) < 12 and "Bom dia" or "Boa tarde", v.deadline)
+		if v.phone ~= "" then
+			if qrcode(v.fname .. v.date, string.format("https://api.whatsapp.com/send?phone=%s&text=%s",
+				v.phone ~= "" and v.phone or v.cell, mg.url_encode(msg))) then
+				mg.write(string.format(fmt, "click", v.fname .. v.date))
+			else
+				mg.write(string.format(fmt, "old", v.fname .. v.date))
+			end
+		else
+			if qrcode(v.name .. v.date, msg) then
+				mg.write(string.format(fmt, "new", v.fname .. v.date))
+			else
+				mg.write(string.format(fmt, "old", v.fname .. v.date))
+			end
+		end
+		mg.write('\t</div>\n')
+	end
+end
+
+local res = { }
+resgate(res)
+
+local first = true
+for i,v in pairs(res) do
+	if not exists(v.lock) then
+		touch(v.lock)
+		if fisrt then
+			mg.write('\t<h2>[ <a href="#', i, '">Próximo</a> ]</h2>')
+			first = false
+		end
+		mg.write("\t<h1 id=", i, ">", v.heading, "</h1>\n")
+		mg.write('\t<div class="qrcode">\n')
+		local fmt = '\t\t<div class="%s"><img src="img/%s.svg"></div>\n'
+		if qrcode(v.fname, v.name) then
+			mg.write(string.format(fmt, "new", v.fname))
+		else
+			mg.write(string.format(fmt, "old", v.fname))
+		end
+		local vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:C - %s\nTEL;TYPE=CELL:%s\nNOTE:Origem: PostalCap\nEND:VCARD\n"
+		if v.phone ~= "" and v.cell ~= "" then
+			vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:C - %s\nTEL;TYPE=CELL:%s\nTEL;TYPE=CELL:%s\nNOTE:Origem: PostalCap\nEND:VCARD\n"
+			vcard = string.format(vcard, v.name, phone_encode(v.phone), phone_encode(v.cell))
+		else
+			if v.phone ~= "" then
+				vcard = string.format(vcard, v.name, phone_encode(v.phone), v.origin)
+			end
+			if v.cell ~= "" then
+				vcard = string.format(vcard, v.name, phone_encode(v.cell), v.origin)
+			end
+		end
+		if v.phone ~= "" or v.cell ~= "" then
+			if qrcode(v.fname .. "vcf", vcard) then
+				mg.write(string.format(fmt, "new", v.fname .. "vcf"))
+			else
+				mg.write(string.format(fmt, "old", v.fname .. "vcf"))
+			end
+		else
+			if exists(v.fname .. "vcf") then
+				mg.write(string.format(fmt, "old", v.fname .. "vcf"))
+			else
+				mg.write('\t\t<div class="empty"></div>\n')
+			end
+		end
+		local msg = "%s? %s!\nEu trabalho nos Correios. Seu PostalCap comprado dia %s já pode ser resgatado. Você recebe de volta metade do valor que pagou há um ano atrás. Aproveite para renovar.\nNão precisa ficar na fila, só chegar aqui e procurar pelo *Tiago*."
+		msg = string.format(msg, v.name, tonumber(os.date("%H")) < 12 and "Bom dia" or "Boa tarde", v.date)
 		if v.phone ~= "" then
 			if qrcode(v.fname .. v.date, string.format("https://api.whatsapp.com/send?phone=%s&text=%s",
 				v.phone ~= "" and v.phone or v.cell, mg.url_encode(msg))) then
