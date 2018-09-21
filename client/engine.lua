@@ -34,20 +34,8 @@ function eng.late(date, lasttime, today)
 	end
 end
 
-function eng.load()
-	local dsuffix = fun.lastdata()
-	fun.dofile("srodata", dsuffix)
-	fun.dofile("ldidata", dsuffix)
-	eng.delete = { }
-	eng.simple = { }
-	local arq = io.open("data/delete.csv", "r")
-	if arq then
-		for line in arq:lines() do
-			eng.delete[line:upper():gsub("–", "-"):gsub(",*$", "")] = true
-		end
-		arq:close()
-	end
-	arq = io.open("Posta Restante.csv", "r")
+function eng.loadcsv(name, dest)
+	local arq, err = io.open(name, "r")
 	if not arq then return dsuffix end
 	for line in arq:lines() do
 		line = line:upper():gsub("–", "-"):gsub(",*$", "")
@@ -67,11 +55,32 @@ function eng.load()
 				else
 					t.OBJ_TYPE = "simple"
 				end
-				table.insert(eng.simple, t)
+				table.insert(dest, t)
 			end
 		end
 	end
 	arq:close()
+end
+
+function eng.load()
+	local dsuffix = fun.lastdata()
+	fun.dofile("srodata", dsuffix)
+	fun.dofile("ldidata", dsuffix)
+	eng.delete = { }
+	eng.simple = { }
+	local arq = io.open("data/delete.csv", "r")
+	if arq then
+		for line in arq:lines() do
+			eng.delete[line:upper():gsub("–", "-"):gsub(",*$", "")] = true
+		end
+		arq:close()
+	end
+	eng.loadcsv("//MMT24043101/Users/84292270/Posta_Restante/Posta Restante.csv", eng.simple)
+	for file in lfs.dir("simple") do
+		if file:match("%.csv$") then
+			eng.loadcsv("simple/" .. file, eng.simple)
+		end
+	end
 	return dsuffix
 end
 
@@ -241,6 +250,17 @@ function eng.search(options)
 end
 
 function eng.sortlate(a, b)
+	-- TODO FIX
+	if a and not b then
+		return true
+	end
+	if not a and b then
+		return false
+	end
+	if not a and not b then
+		return true
+	end
+	-- TODO END
 	if a.LTD_ID and b.LTD_ID then
 		if a.LTD_ID < b.LTD_ID then
 			return true
