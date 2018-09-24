@@ -35,7 +35,7 @@ function eng.late(date, lasttime, today)
 end
 
 function eng.loadcsv(name, dest)
-	local arq, err = io.open(name, "r")
+	local arq = io.open(name, "r")
 	if not arq then return dsuffix end
 	for line in arq:lines() do
 		line = line:upper():gsub("–", "-"):gsub(",*$", "")
