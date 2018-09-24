@@ -213,7 +213,7 @@ end
 
 function sro(ret)
 	fun.dofile("srodata", fun.lastdata())
-	for i,v in ipairs(fun.data.srodata) do
+	for _,v in ipairs(fun.data.srodata) do
 		repeat
 			if v.LTD_HITUNITCEP ~= ucep then break end
 			if not v.CS_NAME or v.CS_NAME == "" then break end
@@ -262,7 +262,7 @@ function sro(ret)
 				if v.LTD_ITEMCODE ~= "BR" then
 					lasttime = 20
 				else
-					for i, v in pairs(default) do
+					for _, v in pairs(default) do
 						if v.LTD_ITEMCODE:match(v[1]) then
 							lasttime = v[2]
 							break
@@ -360,7 +360,7 @@ local first = true
 for i,v in pairs(res) do
 	if not exists(v.lock) then
 		touch(v.lock)
-		if fisrt then
+		if not first then
 			mg.write('\t<h2>[ <a href="#', i, '">Próximo</a> ]</h2>')
 			first = false
 		end
