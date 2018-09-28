@@ -149,35 +149,34 @@ function deadline(date, lasttime)
 end
 
 -- TODO ignorar excluidos
-function simples(ret)
-	local h = io.open("//MMT24043101/Users/84292270/Posta_Restante/Posta Restante.csv", "r")
-	if h then
-		for line in h:lines() do
-			line = line:upper():gsub("–", "-"):gsub(",*$", ""):gsub("%s$", "")
-			if line ~= "" then
-				local t = csv.from(line)
-				if type(t) == "table" and type(t[1]) == "string" and type(t[2]) == "string" and type(t[3]) == "string" and type(t[4]) == "string" and type(t[5]) == "string" then
-					local name    = t[4]:gsub("^[%A]+", ""):gsub("[%A]+$", ""):gsub("%f[%a]%a-%f[%A]", capital)
-					local phone   = phone_decode(t[5])
-					local date    = convert(t[2])
-					if name ~= "" and phone ~= "" and not (day and day ~= date) then
-						table.insert(ret, {
-							heading  = string.format("%s - %s - %s", t[3], t[4], t[1]),
-							name     = name,
-							fname    = name:gsub("[\\/:*?\"<>|]", "~"),
-							phone    = phone,
-							cell     = "",
-							date     = date,
-							deadline = deadline(date, 20),
-							lock     = string.format("%s-%s-%s", date, t[3], name:gsub("[\\/:*?\"<>|]", "~")),
-							origin   = "simples",
-						})
-					end
+function simples(name, ret)
+	local h = io.open(name, "r")
+	if not h then return end
+	for line in h:lines() do
+		line = line:upper():gsub("–", "-"):gsub(",*$", ""):gsub("%s$", "")
+		if line ~= "" then
+			local t = csv.from(line)
+			if type(t) == "table" and type(t[1]) == "string" and type(t[2]) == "string" and type(t[3]) == "string" and type(t[4]) == "string" and type(t[5]) == "string" then
+				local name    = t[4]:gsub("^[%A]+", ""):gsub("[%A]+$", ""):gsub("%f[%a]%a-%f[%A]", capital)
+				local phone   = phone_decode(t[5])
+				local date    = convert(t[2])
+				if name ~= "" and phone ~= "" and not (day and day ~= date) then
+					table.insert(ret, {
+						heading  = string.format("%s - %s - %s", t[3], t[4], t[1]),
+						name     = name,
+						fname    = name:gsub("[\\/:*?\"<>|]", "~"),
+						phone    = phone,
+						cell     = "",
+						date     = date,
+						deadline = deadline(date, 20),
+						lock     = string.format("%s-%s-%s", date, t[3], name:gsub("[\\/:*?\"<>|]", "~")),
+						origin   = "simples",
+					})
 				end
 			end
 		end
-		h:close()
 	end
+	h:close()
 end
 
 function resgate(ret)
@@ -289,7 +288,12 @@ function sro(ret)
 end
 
 local ret = { }
-simples(ret)
+simples("//MMT24043101/Users/84292270/Posta_Restante/Posta Restante.csv", ret)
+for file in lfs.dir("simple") do
+	if file:match("%.csv$") then
+		simples("simple/" .. file, ret)
+	end
+end
 sro(ret)
 
 local first = true
@@ -298,6 +302,7 @@ for i,v in pairs(ret) do
 		touch(v.lock)
 		if not first then
 			mg.write('\t<h2>[ <a href="#', i, '">Próximo</a> ]</h2>')
+		else
 			first = false
 		end
 		mg.write("\t<h1 id=", i, ">", v.heading, "</h1>\n")
@@ -356,12 +361,13 @@ end
 local res = { }
 resgate(res)
 
-local first = true
+first = true
 for i,v in pairs(res) do
 	if not exists(v.lock) then
 		touch(v.lock)
 		if not first then
 			mg.write('\t<h2>[ <a href="#', i, '">Próximo</a> ]</h2>')
+		else
 			first = false
 		end
 		mg.write("\t<h1 id=", i, ">", v.heading, "</h1>\n")
