@@ -170,7 +170,8 @@ function eng.search(options)
 			local a, b, c
 			if options.search:find("^AR%d%d%d%d%d%d%d%d%d%a%a$") then
 				a, b = pcall(string.find, v.LTD_ITEMCODE, options.search:gsub("^AR(%d%d%d%d%d%d%d%d%d)%a%a$", "%%a%%a%1%%a%%a"))
-			elseif options.search:find("^%a%a%d%d%d%d%d%d%d%d%d%a%a$") then
+			elseif options.search:find("^%a%a%d%d%d%d%d%d%d%d%d%a%a$") or
+				(options.search:find("^%a%a") and options.search:sub(3, -1):find("^%d+$")) then
 				a, b = pcall(string.find, v.LTD_ITEMCODE, options.search)
 			elseif options.search:find("^%d%d%d%d%d%d%d%d%d%d%d%d$") then
 				options.order = "LTD_GROUPNUMBER"
@@ -217,10 +218,8 @@ function eng.search(options)
 			else
 				c = eng.late(v[2], 20, options.ltoday)
 			end
-			if options.sby == 2 then -- Nome
-				a, b = pcall(string.find, v[4], options.search)
-			elseif options.sby == 4 then -- Número
-				a, b = pcall(string.find, v[3], options.search)
+			if options.sby == 2 or options.sby == 4 then -- Nome ou Número
+				a, b = pcall(string.find, string.format("%s - %s", v[3], v[4]), options.search)
 			end
 			if a and b and c then
 				if v.OBJ_TYPE == "simple" and options.simple then
