@@ -1,4 +1,5 @@
 
+local cfg = require("config")
 local fun = require("functions")
 local csv = require("client.csvutils")
 local eng = { }
@@ -148,7 +149,7 @@ function eng.check_options(options)
 	if options.volume == nil then options.volume = true end
 	-- options.postal == nil é o mesmo que false
 	options.sby    = options.sby   or 2
-	options.unit   = options.unit  or "78455970" -- custom
+	options.unit   = options.unit  or cfg.unit
 	options.order  = options.order or "CS_NAME"
 	return options
 end
@@ -211,29 +212,31 @@ function eng.search(options)
 				end
 			end
 		end
-		for _,v in ipairs(eng.simple) do
-			local a, b, c
-			if not options.late then
-				c = true
-			else
-				c = eng.late(v[2], 20, options.ltoday)
-			end
-			if options.sby == 2 or options.sby == 4 then -- Nome ou Número
-				a, b = pcall(string.find, string.format("%s - %s", v[3], v[4]), options.search)
-			end
-			if a and b and c then
-				if v.OBJ_TYPE == "simple" and options.simple then
-					table.insert(r, v)
-				elseif v.OBJ_TYPE == "envreg" and options.envreg then
-					table.insert(r, v)
-				elseif v.OBJ_TYPE == "envsed" and options.envsed then
-					table.insert(r, v)
-				elseif v.OBJ_TYPE == "intern" and options.intern then
-					table.insert(r, v)
-				elseif v.OBJ_TYPE == "volume" and options.volume then
-					table.insert(r, v)
-				elseif v.OBJ_TYPE == "cobrar" and options.cobrar then
-					table.insert(r, v)
+		if options.unit == cfg.unit then
+			for _,v in ipairs(eng.simple) do
+				local a, b, c
+				if not options.late then
+					c = true
+				else
+					c = eng.late(v[2], 20, options.ltoday)
+				end
+				if options.sby == 2 or options.sby == 4 then -- Nome ou Número
+					a, b = pcall(string.find, string.format("%s - %s", v[3], v[4]), options.search)
+				end
+				if a and b and c then
+					if v.OBJ_TYPE == "simple" and options.simple then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "envreg" and options.envreg then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "envsed" and options.envsed then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "intern" and options.intern then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "volume" and options.volume then
+						table.insert(r, v)
+					elseif v.OBJ_TYPE == "cobrar" and options.cobrar then
+						table.insert(r, v)
+					end
 				end
 			end
 		end
